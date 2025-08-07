@@ -1,8 +1,6 @@
-# A local development project.
-# Refer to the docs for more details: https://supabase.com/docs/reference/cli/supabase-init
-[project]
-project_id = "your-project-id"
+# supabase/config.toml
 
+# Configuração geral do projeto
 [api]
 enabled = true
 port = 54321
@@ -10,14 +8,12 @@ schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
+# Configuração de autenticação
 [auth]
 enabled = true
-port = 9999
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-refresh_token_reuse_interval = 10
 enable_signup = true
 
 [auth.email]
@@ -25,33 +21,28 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 
+# Configuração do banco de dados local
 [db]
 port = 54322
-shadow_port = 54320
 major_version = 15
 
-[functions.delete-user]
-enabled = true
-verify_jwt = true
-import_map = "./functions/delete-user/deno.json"
-entrypoint = "./functions/delete-user/index.ts"
-
-[functions.create-user]
-enabled = true
-verify_jwt = true
-import_map = "./functions/create-user/deno.json"
-entrypoint = "./functions/create-user/index.ts"
-
+# Configuração de armazenamento (storage)
 [storage]
 enabled = true
-port = 54323
 file_size_limit = "50MiB"
 
-[edge-runtime]
-enabled = true
-port = 54324
+# Definições das suas Edge Functions
+[functions.create-user]
+verify_jwt = false
 
-[analytics]
-enabled = false
-port = 54327
-vector_port = 54328
+[functions.delete-user]
+verify_jwt = false
+
+[functions.create-clinic]
+verify_jwt = false
+
+[functions.signup-handler]
+verify_jwt = false
+
+[functions.create-clinic-with-admin]
+verify_jwt = false

@@ -1,11 +1,14 @@
+// src/pages/LoginPage.tsx
+
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { supabase } from '../lib/supabaseClient' // Corrigido para nosso cliente
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Calendar, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { toast } from "sonner"; // Usaremos o sonner que já temos
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -13,22 +16,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
-
-    if (!isSupabaseConfigured()) {
-      // Modo demo - simular login
-      setTimeout(() => {
-        console.log('Login em modo demo')
-        navigate('/dashboard')
-        setLoading(false)
-      }, 1000)
-      return
-    }
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -37,24 +28,24 @@ export function LoginPage() {
       })
 
       if (error) {
-        setError(error.message)
+        toast.error(error.message)
       } else {
+        toast.success("Login realizado com sucesso!")
         navigate('/dashboard')
       }
-    } catch (err) {
-      setError('Erro inesperado. Tente novamente.')
+    } catch (err: any) {
+      toast.error('Erro inesperado: ' + err.message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 animate-fade-in-down">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">ClinicaOS</span>
@@ -63,7 +54,7 @@ export function LoginPage() {
           <p className="text-gray-600 mt-2">Entre na sua conta para continuar</p>
         </div>
 
-        <Card>
+        <Card className="animate-fade-in-up shadow-xl border-0">
           <CardHeader>
             <CardTitle>Entrar</CardTitle>
             <CardDescription>
@@ -72,13 +63,6 @@ export function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-md">
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -88,6 +72,7 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -101,6 +86,7 @@ export function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="focus:ring-2 focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -112,7 +98,7 @@ export function LoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:scale-[1.02] transition-transform" disabled={loading}>
                 {loading ? 'Entrando...' : 'Entrar'}
               </Button>
             </form>
@@ -125,22 +111,8 @@ export function LoginPage() {
                 </Link>
               </p>
             </div>
-
-            <div className="mt-4 text-center">
-              <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-                ← Voltar ao início
-              </Link>
-            </div>
           </CardContent>
         </Card>
-
-        {!isSupabaseConfigured() && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              <strong>Modo Demo:</strong> Use qualquer email e senha para testar o sistema.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )

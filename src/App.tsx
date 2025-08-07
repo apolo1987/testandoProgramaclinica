@@ -1,6 +1,8 @@
+// src/App.tsx
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
+import { supabase } from './lib/supabaseClient'
 import { User } from '@supabase/supabase-js'
 import { WelcomePage } from './pages/WelcomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -14,12 +16,6 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      console.warn('Supabase não configurado, executando em modo demo')
-      setLoading(false)
-      return
-    }
-
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -35,7 +31,7 @@ function App() {
     getSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setUser(session?.user ?? null)
         setLoading(false)
       }
@@ -58,7 +54,10 @@ function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/dashboard" />} />
+        
+        {/* Rota do Dashboard que usa o Layout */}
         <Route path="/dashboard/*" element={user ? <Layout /> : <Navigate to="/login" />} />
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster />
